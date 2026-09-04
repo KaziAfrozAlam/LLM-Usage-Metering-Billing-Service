@@ -1,4 +1,4 @@
-# Usage Metering & Billing Engine (Capstone)
+# Usage Metering & Billing Engine (FlyRank Capstone)
 
 A backend service that **meters customer usage**, **enforces plan quotas**, **prices AI-token
 usage** (including cached-input and reasoning tokens), and **syncs subscriptions with Stripe in
