@@ -1,0 +1,79 @@
+# Capstone run spec — Usage Metering & Billing Engine
+
+run: npm start
+seed: npm run seed
+migrate: npm run migrate
+setup: |
+  # Node.js >= 18 required. SQLite only (no Docker).
+  npm install
+  cp .env.example .env          # optional: fill Stripe TEST keys / webhook secret
+  npm run migrate               # applies src/db/migrations/*.sql
+  npm run seed                  # plans + demo tenants (+ Stripe test price if key present)
+test: npm test
+base_url: http://localhost:3000
+
+tenants:
+  - tenant_id: tenant-free
+    api_key: key_demo_free
+    plan: free
+  - tenant_id: tenant-pro
+    api_key: key_demo_pro
+    plan: pro
+
+endpoints:
+  - method: POST
+    path: /generate
+    auth: X-API-Key
+    body:
+      idempotency_key: "string (required, unique per request)"
+      prompt: "string (required)"
+      max_output_tokens: "int, optional (default 500, max 4096)"
+      reasoning_tokens: "int, optional (default 0, max 4096)"
+      cache_input: "bool, optional (default false)"
+    responses:
+      201: "usage recorded; also the mirror status for idempotent duplicates"
+      400: "validation/boundary error (bad body)"
+      402: "plan/payment issue (e.g. Pro tenant with inactive subscription)"
+      429: "usage quota exceeded (used + requested > limit)"
+      401: "missing/invalid X-API-Key"
+  - method: GET
+    path: /usage?period=YYYY-MM
+    auth: X-API-Key
+    responses:
+      200: "{ period, api_calls:{used,limit,remaining}, tokens:{used,limit,remaining}, cost, breakdown }"
+  - method: GET
+    path: /usage/alerts?period=YYYY-MM
+    auth: X-API-Key
+    responses:
+      200: "alerts fired this period: [] or [{ metric: api_call|token, threshold_pct: 80|100 }]"
+  - method: POST
+    path: /checkout/subscription
+    auth: X-API-Key
+    body:
+      plan: pro
+    responses:
+      201: "Stripe Checkout session (TEST MODE) — pay with 4242 4242 4242 4242"
+      400: "unknown plan"
+  - method: POST
+    path: /webhooks/stripe
+    headers:
+      stripe-signature: "required"
+    body: "raw Stripe event body"
+    responses:
+      200: "{ received: true, processed: true|false, duplicate?: true }"
+      400: "signature verification failed (forged webhook rejected)"
+      503: "STRIPE_WEBHOOK_SECRET not configured"
+  - method: GET
+    path: /plans
+    responses:
+      200: "plan list with api_call_limit / token_limit / price_cents"
+
+evidence_scripts:
+  - node scripts/simulate_webhook.js   # forged->400, signed->processed once, replay->duplicate
+  - node scripts/demo_checkout_flow.js # Free->Pro flip reflected in GET /usage limits
+  - node scripts/set_boundary.js       # drive tenant to 999/1000 API calls for boundary test
+  - node scripts/plant_usage.js        # plant N usage events (alert demos)
+
+notes:
+  - Stripe is TEST MODE only (sk_test_...). Never use live keys.
+  - No public tunnel needed: `stripe listen --forward-to localhost:3000/webhooks/stripe`.

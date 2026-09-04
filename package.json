@@ -1,0 +1,32 @@
+{
+  "name": "usage-metering-billing-engine",
+  "version": "1.0.0",
+  "description": "Usage Metering & Billing Engine - Node.js backend tracking customer usage, enforcing plan quotas, calculating AI-token costs, and syncing subscriptions with Stripe (test mode).",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/db/index.js",
+    "seed": "node src/db/seed.js",
+    "rollup": "node src/jobs/rollup.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "usage-metering",
+    "billing",
+    "stripe",
+    "quota",
+    "ai-tokens"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "stripe": "^16.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets — NEVER commit Stripe keys or webhook secrets
+.env
+.env.*
+!.env.example
+
+# Database files (SQLite)
+*.db
+*.db-wal
+*.db-shm
+__migrations/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+coverage/
