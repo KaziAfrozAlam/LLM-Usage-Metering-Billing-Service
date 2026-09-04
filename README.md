@@ -1,8 +1,8 @@
 # Usage Metering & Billing Engine (FlyRank Capstone)
 
 A backend service that **meters customer usage**, **enforces plan quotas**, **prices AI-token
-usage** (including cached-input and reasoning tokens), and **syncs subscriptions with Stripe in
-TEST MODE**. Built with Node.js + Express, SQLite (via `better-sqlite3`), and the Stripe SDK.
+usage** (including cached-input and reasoning tokens), and **syncs subscriptions with Stripe/RazorPay in
+TEST MODE**. Built with Node.js + Express, SQLite (via `better-sqlite3`), and the Stripe/RazorPay SDK.
 
 > Money is stored as **integer micro-units** (1 USD = 1,000,000 micro-units). No floats anywhere.
 
